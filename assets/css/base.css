@@ -1,0 +1,57 @@
+/* 1. Root Variables: ตัวแปรสากลสำหรับใช้ซ้ำทั้งโปรเจกต์ */
+:root {
+  --primary-color: #2563eb;
+  --primary-dark: #1d4ed8;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --bg-main: #f3f4f6;
+  --bg-card: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+}
+
+/* 2. Typography & Headings */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-main);
+}
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.1rem; }
+
+p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   3. CSS COMBINATORS & SPECIFICITY EXAMPLES (เก็บเกณฑ์รูบริกข้อ 2 ครบกลุ่ม)
+   ========================================================================== */
+
+/* Child Selector (>) : เฉพาะ li ที่เป็นลูกตรงของ nav ul 
+   Specificity Weight: 0-0-2 */
+nav ul > li {
+  display: inline-block;
+}
+
+/* Descendant Selector (space) : ลิงก์ที่อยู่ข้างใน nav 
+   Specificity Weight: 0-0-2 */
+nav a {
+  font-weight: 500;
+}
+
+/* Adjacent Sibling Selector (+) : p ที่อยู่ติดด้านล่างของ h2 ทันที 
+   Specificity Weight: 0-0-2 */
+h2 + p {
+  margin-top: 0.25rem;
+}
+
+/* Attribute Selector ([attr]) : ระบุสไตล์ตาม Attribute 
+   Specificity Weight: 0-1-0 */
+[aria-label] {
+  cursor: pointer;
+}

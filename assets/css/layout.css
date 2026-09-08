@@ -1,0 +1,169 @@
+/* ==========================================================================
+   1. MOBILE-FIRST BASE (ค่าเริ่มต้นสำหรับหน้าจอมือถือ < 640px)
+   ========================================================================== */
+
+/* ส่วนหัว: จัดแบบ Flexbox */
+header {
+  background-color: #ffffff;
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  color: #2563eb;
+}
+
+/* ปุ่มแฮมเบอร์เกอร์บนมือถือ */
+#menu-toggle-btn {
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* เมนูบนมือถือ: ซ่อนไว้ก่อนเป็นค่าเริ่มต้น */
+#main-nav {
+  display: none;
+  width: 100%;
+}
+
+/* เมื่อกดปุ่มแล้ว JS ใส่คลาส nav-open ให้กางเมนูออกมา */
+#main-nav.nav-open {
+  display: block !important;
+}
+
+header nav ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+header nav a {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background-color: #f3f4f6;
+  color: #374151;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+header nav a:hover,
+header nav a.active {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+/* พื้นที่เนื้อหาหลัก */
+main {
+  padding: 1.5rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+main section:first-child {
+  margin-bottom: 1.5rem;
+}
+
+main section:first-child h2 {
+  font-size: 1.35rem;
+  color: #111827;
+}
+
+main section:first-child p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* การ์ด 4 โมดูล: บนมือถือเรียง 1 คอลัมน์เดี่ยว */
+main section:last-child {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+article {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 1.25rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+article h3 {
+  font-size: 1rem;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+article p {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #111827;
+}
+
+/* ส่วนท้ายเว็บ */
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   2. RESPONSIVE BREAKPOINTS
+   ========================================================================== */
+
+/* แท็บเล็ต (640px ขึ้นไป): การ์ดแสดง 2 คอลัมน์ */
+@media (min-width: 640px) {
+  main section:last-child {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* จอคอมพิวเตอร์ (769px ขึ้นไป): แสดงเมนูแนวนอน และซ่อนปุ่ม ☰ */
+@media (min-width: 769px) {
+  #menu-toggle-btn {
+    display: none !important; /* ซ่อนปุ่ม ☰ บนจอคอม */
+  }
+
+  #main-nav {
+    display: block !important; /* แสดงเมนูตลอดเวลาบนจอคอม */
+    width: auto;
+  }
+
+  header nav ul {
+    flex-direction: row;
+    width: auto;
+  }
+
+  header nav a {
+    display: inline-block;
+    width: auto;
+  }
+}
+
+/* เดสก์ท็อปขนาดใหญ่ (1024px ขึ้นไป): จัด Header แนวนอนแยกซ้าย-ขวา และการ์ดแสดง 4 คอลัมน์ */
+@media (min-width: 1024px) {
+  header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+  }
+
+  main {
+    padding: 2.5rem 2rem;
+  }
+
+  main section:last-child {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
