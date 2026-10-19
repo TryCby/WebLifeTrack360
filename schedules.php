@@ -90,7 +90,7 @@ foreach ($dayMapping as $dowIndex) {
     $scheduleDayCounts[] = isset($dowRaw[$dowIndex]) ? (int)$dowRaw[$dowIndex] : 0;
 }
 
-// 4. กรองรายการตารางเวลาตามสถานะเวลาปัจจุบัน (ซ่อนอันที่จบแล้วเป็นค่าเริ่มต้น)
+// 4. กรองรายการตารางเวลาตามสถานะเวลาปัจจุบัน
 $statusCondition = "";
 if ($viewStatus === 'upcoming') {
     $statusCondition = " AND end_time >= NOW()";
@@ -123,8 +123,8 @@ $totalEvents = count($schedules);
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
     .form-group input { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-    .btn-submit { padding: 9px 20px; background: #17a2b8; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .btn-submit:hover { background: #138496; }
+    .btn-submit { padding: 9px 20px; background: #2563eb; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.2s ease; }
+    .btn-submit:hover { background: #1d4ed8; }
     table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     table.data-table th, table.data-table td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; font-size: 14px; }
     table.data-table th { background: #f8f9fa; }
@@ -146,11 +146,12 @@ $totalEvents = count($schedules);
       text-decoration: none;
       font-size: 13px;
       font-weight: 500;
+      transition: all 0.15s ease;
     }
     .view-btn.active {
-      background: #17a2b8;
+      background: #2563eb;
       color: #fff;
-      border-color: #17a2b8;
+      border-color: #2563eb;
       font-weight: 600;
     }
     @media (max-width: 768px) {
@@ -226,7 +227,7 @@ $totalEvents = count($schedules);
               <?php foreach ($dayNames as $i => $name): ?>
                 <tr style="border-bottom: 1px solid #f9fafb; font-size: 13px;">
                   <td style="padding: 6px 0; color: #4b5563;"><?php echo $name; ?></td>
-                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: <?php echo $scheduleDayCounts[$i] > 0 ? '#17a2b8' : '#9ca3af'; ?>;">
+                  <td style="padding: 6px 0; text-align: right; font-weight: bold; color: <?php echo $scheduleDayCounts[$i] > 0 ? '#2563eb' : '#9ca3af'; ?>;">
                     <?php echo $scheduleDayCounts[$i]; ?> รายการ
                   </td>
                 </tr>
@@ -339,39 +340,42 @@ $totalEvents = count($schedules);
         const ctx = canvas.getContext('2d');
         const maxVal = Math.max(...data, 4);
         const chartHeight = 130;
-        const chartWidth = canvas.width - 50;
+        const paddingLeft = 30;
+        const paddingRight = 20;
+        const chartWidth = canvas.width - paddingLeft - paddingRight;
+        const stepWidth = chartWidth / data.length;
         const barWidth = 32;
-        const startX = 35;
         const baseY = 160;
 
         data.forEach((val, i) => {
-          const x = startX + i * (chartWidth / data.length) + 12;
+          const centerX = paddingLeft + (i * stepWidth) + (stepWidth / 2);
+          const x = centerX - (barWidth / 2);
           const barH = val > 0 ? (val / maxVal) * chartHeight : 4;
           const y = baseY - barH;
 
-          ctx.fillStyle = val > 0 ? '#17a2b8' : '#e5e7eb';
+          ctx.fillStyle = val > 0 ? '#2563eb' : '#e5e7eb';
           ctx.beginPath();
           ctx.roundRect ? ctx.roundRect(x, y, barWidth, barH, [4, 4, 0, 0]) : ctx.fillRect(x, y, barWidth, barH);
           ctx.fill();
 
           if (val > 0) {
-            ctx.fillStyle = '#0f766e';
+            ctx.fillStyle = '#1d4ed8';
             ctx.font = 'bold 11px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(val, x + (barWidth / 2), y - 6);
+            ctx.fillText(val, centerX, y - 6);
           }
 
           ctx.fillStyle = '#4b5563';
           ctx.font = '11px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(labels[i], x + (barWidth / 2), baseY + 18);
+          ctx.fillText(labels[i], centerX, baseY + 18);
         });
 
         ctx.strokeStyle = '#e5e7eb';
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(startX, baseY);
-        ctx.lineTo(canvas.width - 15, baseY);
+        ctx.moveTo(paddingLeft - 10, baseY);
+        ctx.lineTo(canvas.width - paddingRight + 10, baseY);
         ctx.stroke();
       }
     });

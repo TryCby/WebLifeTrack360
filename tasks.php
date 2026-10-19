@@ -129,8 +129,8 @@ $tasks = $taskStmt->fetchAll();
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
     .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-family: inherit; }
-    .btn-submit { padding: 9px 20px; background: #ffc107; color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .btn-submit:hover { background: #e0a800; }
+    .btn-submit { padding: 9px 20px; background: #2563eb; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.2s ease; }
+    .btn-submit:hover { background: #1d4ed8; }
     table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     table.data-table th, table.data-table td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; font-size: 14px; }
     table.data-table th { background: #f8f9fa; }
@@ -139,7 +139,7 @@ $tasks = $taskStmt->fetchAll();
     .badge-p-low { background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
     .task-done { text-decoration: line-through; color: #888; }
     .btn-action { padding: 4px 8px; border-radius: 4px; font-size: 12px; text-decoration: none; margin-right: 5px; display: inline-block; }
-    .btn-done { background: #28a745; color: #fff; }
+    .btn-done { background: #10b981; color: #fff; }
     .btn-delete { background: #dc3545; color: #fff; }
   </style>
 </head>
@@ -191,16 +191,16 @@ $tasks = $taskStmt->fetchAll();
     <div class="stat-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 style="font-size: 1.1rem; color: #333;">ความคืบหน้าของงาน (<?php echo $displayTitle; ?>)</h3>
-        <span style="font-weight: bold; color: #28a745;"><?php echo $completedPercent; ?>% เสร็จสมบูรณ์</span>
+        <span style="font-weight: bold; color: #10b981;"><?php echo $completedPercent; ?>% เสร็จสมบูรณ์</span>
       </div>
       
       <?php if ($totalTasks > 0): ?>
         <div style="width: 100%; height: 18px; background: #f3f4f6; border-radius: 9px; overflow: hidden; display: flex;">
-          <div style="width: <?php echo $completedPercent; ?>%; background: #28a745; transition: width 0.4s ease;"></div>
+          <div style="width: <?php echo $completedPercent; ?>%; background: #10b981; transition: width 0.4s ease;"></div>
           <div style="width: <?php echo 100 - $completedPercent; ?>%; background: #f59e0b; transition: width 0.4s ease;"></div>
         </div>
         <div style="display: flex; gap: 20px; margin-top: 12px; font-size: 13px;">
-          <span><strong style="color: #28a745;">✔ เสร็จแล้ว:</strong> <?php echo $completedCount; ?> งาน</span>
+          <span><strong style="color: #10b981;">✔ เสร็จแล้ว:</strong> <?php echo $completedCount; ?> งาน</span>
           <span><strong style="color: #f59e0b;">⏳ รอทำ:</strong> <?php echo $pendingCount; ?> งาน</span>
           <span><strong>รวม:</strong> <?php echo $totalTasks; ?> งาน</span>
         </div>
@@ -259,7 +259,7 @@ $tasks = $taskStmt->fetchAll();
               <tr>
                 <td>
                   <?php if ($t['status'] === 'completed'): ?>
-                    <span style="color: #28a745; font-weight: bold;">✔ เสร็จแล้ว</span>
+                    <span style="color: #10b981; font-weight: bold;">✔ เสร็จแล้ว</span>
                   <?php else: ?>
                     <span style="color: #f57f17; font-weight: bold;">⏳ กำลังทำ</span>
                   <?php endif; ?>

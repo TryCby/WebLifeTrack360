@@ -2,13 +2,26 @@ const AjaxClient = {
   // 1. Fetch API (GET/POST แบบ Promise-based)
   async fetchData(url, options = {}) {
     try {
-      const response = await fetch(url, {
+      const defaultHeaders = {
+        "Accept": "application/json",
+        "X-Requested-With": "XMLHttpRequest"
+      };
+
+      // ถ้า body ไม่ใช่ FormData ให้ใส่ Content-Type เป็น JSON อัตโนมัติ
+      if (options.body && !(options.body instanceof FormData)) {
+        defaultHeaders["Content-Type"] = "application/json";
+      }
+
+      const config = {
+        method: options.method || "GET",
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
+          ...defaultHeaders,
+          ...options.headers
         },
         ...options
-      });
+      };
+
+      const response = await fetch(url, config);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -24,7 +37,7 @@ const AjaxClient = {
   // 2. XMLHttpRequest (XHR แบบ Callback-based)
   sendXHR(method, url, data, callback) {
     const xhr = new XMLHttpRequest();
-    xhr.open(method, url, true);
+    xhr.open(method.toUpperCase(), url, true);
     xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     xhr.onreadystatechange = function () {

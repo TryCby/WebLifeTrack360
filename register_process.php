@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -6,20 +7,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    // ตรวจสอบว่ากรอกข้อมูลครบทุกช่องหรือไม่
     if (empty($username) || empty($email) || empty($password)) {
-        echo "<script>
-            alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
-            window.location.href = 'register.php';
-        </script>";
+        $_SESSION['register_error'] = 'กรุณากรอกข้อมูลให้ครบทุกช่อง';
+        header("Location: register.php");
         exit;
     }
 
-    // ตรวจสอบรูปแบบอีเมลว่าถูกต้องตามหลักสากลไหม
+    // ตรวจสอบรูปแบบอีเมล
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "<script>
-            alert('รูปแบบอีเมลไม่ถูกต้อง');
-            window.location.href = 'register.php';
-        </script>";
+        $_SESSION['register_error'] = 'รูปแบบอีเมลไม่ถูกต้อง';
+        header("Location: register.php");
         exit;
     }
 
@@ -31,10 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $checkStmt->execute([':username' => $username, ':email' => $email]);
 
         if ($checkStmt->fetch()) {
-            echo "<script>
-                alert('ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว');
-                window.location.href = 'register.php';
-            </script>";
+            $_SESSION['register_error'] = 'ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว';
+            header("Location: register.php");
             exit;
         }
 
@@ -46,14 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':password_hash' => $password_hash
         ]);
 
-        echo "<script>
-            alert('สมัครสมาชิกสำเร็จ!');
-            window.location.href = 'login.php';
-        </script>";
+        // สมัครสำเร็จ ส่งกลับไปหน้า login พร้อมแจ้งเตือนหรือให้ล็อกอินได้ทันที
+        header("Location: login.php");
         exit;
 
     } catch (\PDOException $e) {
-        die("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " . $e->getMessage());
+        $_SESSION['register_error'] = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' . $e->getMessage();
+        header("Location: register.php");
+        exit;
     }
 } else {
     header("Location: register.php");

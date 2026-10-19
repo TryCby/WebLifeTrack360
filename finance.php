@@ -16,6 +16,19 @@ $message = "";
 $selectedPeriod = isset($_GET['period']) ? $_GET['period'] : 'all';
 $chartType = isset($_GET['chart_type']) ? $_GET['chart_type'] : 'all_flow';
 
+// ลบรายการธุรกรรมการเงิน
+if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['id'])) {
+    $del_id = intval($_GET['id']);
+    try {
+        $delStmt = $pdo->prepare("DELETE FROM finance_transactions WHERE id = :id AND user_id = :uid");
+        $delStmt->execute([':id' => $del_id, ':uid' => $user_id]);
+        header("Location: finance.php?period=" . urlencode($selectedPeriod) . "&chart_type=" . urlencode($chartType));
+        exit;
+    } catch (\PDOException $e) {
+        $message = "เกิดข้อผิดพลาดในการลบ: " . $e->getMessage();
+    }
+}
+
 // บันทึกข้อมูลเมื่อกดส่งฟอร์ม
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_transaction'])) {
     $type = $_POST['type'];
@@ -45,55 +58,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_transaction'])) {
 }
 
 // 1. ดึงรายการเดือนทั้งหมดที่มีข้อมูลมาทำ Dropdown
-$monthListStmt = $pdo->prepare("
+$monthListStmt =$pdo->prepare("
     SELECT DISTINCT DATE_FORMAT(transaction_date, '%Y-%m') AS period 
     FROM finance_transactions 
     WHERE user_id = :uid 
     ORDER BY period DESC
 ");
-$monthListStmt->execute([':uid' => $user_id]);
-$availableMonths = $monthListStmt->fetchAll(PDO::FETCH_COLUMN);
+$monthListStmt->execute([':uid' =>$user_id]);
+$availableMonths =$monthListStmt->fetchAll(PDO::FETCH_COLUMN);
 
 // 2. สร้างเงื่อนไข SQL ตามตัวเลือกช่วงเวลา
 $dateCondition = "";
-$queryParams = [':uid' => $user_id];
-$displayTitle = "ทั้งหมด (All Time)";
+$queryParams = [':uid' => $user_id];$displayTitle = "ทั้งหมด (All Time)";
 
-if ($selectedPeriod !== 'all' && preg_match('/^\d{4}-\d{2}$/', $selectedPeriod)) {
-    list($currentYear, $currentMonth) = explode('-', $selectedPeriod);
-    $dateCondition = " AND MONTH(transaction_date) = :m AND YEAR(transaction_date) = :y";
-    $queryParams[':m'] = $currentMonth;
-    $queryParams[':y'] = $currentYear;
+if ($selectedPeriod !== 'all' && preg_match('/^\d{4}-\d{2}$/',$selectedPeriod)) {
+    list($currentYear,$currentMonth) = explode('-', $selectedPeriod);$dateCondition = " AND MONTH(transaction_date) = :m AND YEAR(transaction_date) = :y";
+    $queryParams[':m'] =$currentMonth;
+    $queryParams[':y'] =$currentYear;
     $displayTitle = date('F Y', strtotime($selectedPeriod . '-01'));
 }
 
 // 3. คำนวณยอดรวมรายรับ รายจ่าย
-$incomeStmt = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) AS total FROM finance_transactions WHERE user_id = :uid AND type = 'income' $dateCondition");
+$incomeStmt =$pdo->prepare("SELECT COALESCE(SUM(amount), 0) AS total FROM finance_transactions WHERE user_id = :uid AND type = 'income' $dateCondition");
 $incomeStmt->execute($queryParams);
 $totalIncome = (float)$incomeStmt->fetch()['total'];
 
-$expenseStmt = $pdo->prepare("SELECT COALESCE(SUM(amount), 0) AS total FROM finance_transactions WHERE user_id = :uid AND type = 'expense' $dateCondition");
+$expenseStmt =$pdo->prepare("SELECT COALESCE(SUM(amount), 0) AS total FROM finance_transactions WHERE user_id = :uid AND type = 'expense' $dateCondition");
 $expenseStmt->execute($queryParams);
 $totalExpense = (float)$expenseStmt->fetch()['total'];
 
-$balance = $totalIncome - $totalExpense;
+$balance = $totalIncome -$totalExpense;
 
 // 4. จัดเตรียมข้อมูลสำหรับกราฟ Donut ตามแท็บที่เลือก
 $chartLabels = [];
-$chartTotals = [];
-$chartColors = [];
+$chartTotals = [];$chartColors = [];
 
 if ($chartType === 'all_flow') {
-    // โหมดภาพรวมรวมกัน: รายรับ vs รายจ่าย
-    if ($totalIncome > 0 || $totalExpense > 0) {
-        $chartLabels = ['รายรับรวม', 'รายจ่ายรวม'];
-        $chartTotals = [$totalIncome, $totalExpense];
-        $chartColors = ['#10b981', '#ef4444'];
+    if ($totalIncome > 0 || $totalExpense > 0) {$chartLabels = ['รายรับรวม', 'รายจ่ายรวม'];
+        $chartTotals = [$totalIncome, $totalExpense];$chartColors = ['#10b981', '#ef4444'];
     }
 } else {
-    // โหมดเจาะลึกเฉพาะหมวดหมู่
-    $chartQueryParams = array_merge($queryParams, [':chart_type' => $chartType]);
-    $catStmt = $pdo->prepare("
+    $chartQueryParams = array_merge($queryParams, [':chart_type' =>$chartType]);
+    $catStmt =$pdo->prepare("
         SELECT category, SUM(amount) AS total 
         FROM finance_transactions 
         WHERE user_id = :uid AND type = :chart_type $dateCondition
@@ -101,23 +107,23 @@ if ($chartType === 'all_flow') {
         ORDER BY total DESC
     ");
     $catStmt->execute($chartQueryParams);
-    $categoriesData = $catStmt->fetchAll(PDO::FETCH_ASSOC);
+    $categoriesData =$catStmt->fetchAll(PDO::FETCH_ASSOC);
 
     $chartLabels = array_column($categoriesData, 'category');
     $chartTotals = array_map('floatval', array_column($categoriesData, 'total'));
-    $chartColors = $chartType === 'income' 
+    $chartColors =$chartType === 'income' 
         ? ['#10b981', '#06b6d4', '#3b82f6', '#84cc16', '#14b8a6'] 
         : ['#ef4444', '#f97316', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1'];
 }
 
 // 5. ดึงรายการธุรกรรม
-$listStmt = $pdo->prepare("
+$listStmt =$pdo->prepare("
     SELECT * FROM finance_transactions 
     WHERE user_id = :uid $dateCondition 
     ORDER BY transaction_date DESC, id DESC
 ");
 $listStmt->execute($queryParams);
-$transactions = $listStmt->fetchAll();
+$transactions =$listStmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -135,18 +141,19 @@ $transactions = $listStmt->fetchAll();
     .summary-box { background: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .summary-box h4 { margin-bottom: 5px; color: #555; }
     .summary-box .amount { font-size: 1.5rem; font-weight: bold; }
-    .text-income { color: #28a745; }
-    .text-expense { color: #dc3545; }
-    .text-balance { color: #007bff; }
+    .text-income { color: #10b981; }
+    .text-expense { color: #ef4444; }
+    .text-balance { color: #2563eb; }
     .form-card, .table-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 25px; }
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
     .form-group input, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-    .btn-submit { padding: 9px 20px; background: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .btn-submit:hover { background: #0056b3; }
+    .btn-submit { padding: 9px 20px; background: #2563eb; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.2s ease; }
+    .btn-submit:hover { background: #1d4ed8; }
     table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     table.data-table th, table.data-table td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; font-size: 14px; }
     table.data-table th { background: #f8f9fa; }
+    .btn-delete { padding: 4px 8px; border-radius: 4px; font-size: 12px; text-decoration: none; background: #dc3545; color: #fff; }
     
     .chart-layout {
       display: grid;
@@ -164,6 +171,7 @@ $transactions = $listStmt->fetchAll();
       color: #555;
       font-size: 13px;
       font-weight: 600;
+      transition: all 0.15s ease;
     }
     .tab-btn.active-all {
       background: #0284c7;
@@ -176,9 +184,9 @@ $transactions = $listStmt->fetchAll();
       border-color: #dc3545;
     }
     .tab-btn.active-income {
-      background: #28a745;
+      background: #10b981;
       color: #fff;
-      border-color: #28a745;
+      border-color: #10b981;
     }
     @media (max-width: 768px) {
       .chart-layout { grid-template-columns: 1fr; }
@@ -216,8 +224,8 @@ $transactions = $listStmt->fetchAll();
         <label for="period" style="font-size: 0.9rem; font-weight: bold; margin-right: 5px;">ช่วงเวลา:</label>
         <select name="period" id="period" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer;">
           <option value="all" <?php echo ($selectedPeriod === 'all') ? 'selected' : ''; ?>>ทั้งหมด (All Time)</option>
-          <?php foreach ($availableMonths as $p): ?>
-            <option value="<?php echo $p; ?>" <?php echo ($p === $selectedPeriod) ? 'selected' : ''; ?>>
+          <?php foreach ($availableMonths as$p): ?>
+            <option value="<?php echo $p; ?>" <?php echo ($p ===$selectedPeriod) ? 'selected' : ''; ?>>
               <?php echo date('F Y', strtotime($p . '-01')); ?>
             </option>
           <?php endforeach; ?>
@@ -255,7 +263,7 @@ $transactions = $listStmt->fetchAll();
           <?php elseif ($chartType === 'expense'): ?>
             สัดส่วนหมวดหมู่: <span style="color: #dc3545;">รายจ่าย</span>
           <?php else: ?>
-            สัดส่วนหมวดหมู่: <span style="color: #28a745;">รายรับ</span>
+            สัดส่วนหมวดหมู่: <span style="color: #10b981;">รายรับ</span>
           <?php endif; ?>
           (<?php echo $displayTitle; ?>)
         </h3>
@@ -292,7 +300,7 @@ $transactions = $listStmt->fetchAll();
     <!-- ฟอร์มบันทึกข้อมูล -->
     <div class="form-card">
       <h3 style="margin-bottom: 15px;">+ บันทึกรายการใหม่</h3>
-      <form action="finance.php?period=<?php echo $selectedPeriod; ?>&chart_type=<?php echo $chartType; ?>" method="POST">
+      <form action="finance.php?period=<?php echo $selectedPeriod; ?>&chart_type=<?php echo$chartType; ?>" method="POST">
         <input type="hidden" name="add_transaction" value="1">
         <div class="form-row">
           <div class="form-group">
@@ -335,23 +343,27 @@ $transactions = $listStmt->fetchAll();
               <th>รายละเอียด</th>
               <th>ประเภท</th>
               <th style="text-align: right;">จำนวนเงิน</th>
+              <th style="text-align: right;">จัดการ</th>
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($transactions as $row): ?>
+            <?php foreach ($transactions as$row): ?>
               <tr>
                 <td><?php echo htmlspecialchars($row['transaction_date']); ?></td>
                 <td><?php echo htmlspecialchars($row['category']); ?></td>
                 <td><?php echo htmlspecialchars($row['description'] ?? '-'); ?></td>
                 <td>
                   <?php if ($row['type'] === 'income'): ?>
-                    <span style="color: #28a745; font-weight: bold;">รายรับ</span>
+                    <span style="color: #10b981; font-weight: bold;">รายรับ</span>
                   <?php else: ?>
-                    <span style="color: #dc3545; font-weight: bold;">รายจ่าย</span>
+                    <span style="color: #ef4444; font-weight: bold;">รายจ่าย</span>
                   <?php endif; ?>
                 </td>
-                <td style="text-align: right; font-weight: bold; color: <?php echo $row['type'] === 'income' ? '#28a745' : '#dc3545'; ?>;">
+                <td style="text-align: right; font-weight: bold; color: <?php echo $row['type'] === 'income' ? '#10b981' : '#ef4444'; ?>;">
                   <?php echo ($row['type'] === 'income' ? '+' : '-') . number_format($row['amount'], 2); ?> ฿
+                </td>
+                <td style="text-align: right;">
+                  <a href="finance.php?action=delete&id=<?php echo $row['id']; ?>&period=<?php echo urlencode($selectedPeriod); ?>&chart_type=<?php echo urlencode($chartType); ?>" class="btn-delete" onclick="return confirm('ยืนยันลบรายการนี้หรือไม่? ยอดรวมจะถูกคำนวณใหม่ทันที');">ลบ</a>
                 </td>
               </tr>
             <?php endforeach; ?>

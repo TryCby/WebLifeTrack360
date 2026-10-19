@@ -137,7 +137,8 @@ $mHealth = $mHealthStmt->fetch();
       <p>ยินดีต้อนรับคุณ <strong><?php echo $username; ?></strong> สู่ระบบจัดการชีวิตประจำวัน</p>
     </section>
 
-    <section>
+    <!-- ใส่คลาส dashboard-grid สำหรับการ์ด 4 โมดูล -->
+    <section class="dashboard-grid">
       <article id="finance-card">
         <h3>การเงิน <span class="badge badge-success">ปกติ</span></h3>
         <p class="stat-value">฿<?php echo number_format($balance, 2); ?></p>
@@ -169,7 +170,7 @@ $mHealth = $mHealthStmt->fetch();
     </section>
 
     <!-- แถวที่ 2: สถิติสรุปตามเดือน พร้อม Dropdown เลือกเดือน -->
-    <section style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
+    <section style="margin-top: 2rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px;">
       <div>
         <h2>สรุปสถิติประจำเดือน</h2>
         <p style="color: #6b7280; font-size: 0.95rem;">ผลการดำเนินงานในเดือน <strong><?php echo date('F Y', strtotime($selectedPeriod . '-01')); ?></strong></p>
@@ -188,7 +189,8 @@ $mHealth = $mHealthStmt->fetch();
       </form>
     </section>
 
-    <section>
+    <!-- ใส่คลาส dashboard-grid สำหรับการ์ดสรุปประจำเดือน -->
+    <section class="dashboard-grid">
       <article>
         <h3>กระแสเงินสดเดือนนี้</h3>
         <p style="font-size: 1rem; color: #28a745; margin-bottom: 4px;">รับ: +฿<?php echo number_format($mFinance['m_income'], 2); ?></p>

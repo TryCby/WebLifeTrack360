@@ -1,19 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. จัดการปุ่ม Toggle เมนูบนมือถือ
+  // 1. จัดการปุ่ม Toggle เมนูบนมือถือ (ใช้การสลับคลาส nav-open เท่านั้น)
   const menuBtn = document.getElementById("menu-toggle-btn");
   const navMenu = document.getElementById("main-nav");
 
   if (menuBtn && navMenu) {
     menuBtn.addEventListener("click", () => {
-      // สลับ class สำหรับ CSS
       navMenu.classList.toggle("nav-open");
-
-      // บังคับสลับการแสดงผลโดยตรงเพื่อกันกรณี CSS ไม่โหลด
-      if (navMenu.style.display === "block") {
-        navMenu.style.display = "none";
-      } else {
-        navMenu.style.display = "block";
-      }
     });
   }
 

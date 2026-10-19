@@ -5,20 +5,18 @@ require_once 'config/database.php';
 $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $new_password = $_POST['password'];
+    $username = trim($_POST['username'] ?? '');
+    $new_password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($new_password)) {
         $error = "กรุณากรอกข้อมูลให้ครบถ้วน";
     } else {
         try {
-            // ตรวจสอบว่ามีผู้ใช้นี้จริงไหม (รองรับทั้ง username และ email)
             $stmt = $pdo->prepare("SELECT id FROM users WHERE username = :user OR email = :email LIMIT 1");
             $stmt->execute([':user' => $username, ':email' => $username]);
             $user = $stmt->fetch();
 
             if ($user) {
-                // เข้ารหัสและอัปเดตรหัสผ่านใหม่ทันที
                 $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
                 $updateStmt = $pdo->prepare("UPDATE users SET password_hash = :p_hash WHERE id = :id");
                 $updateStmt->execute([':p_hash' => $password_hash, ':id' => $user['id']]);
@@ -47,36 +45,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="assets/css/base.css">
     <link rel="stylesheet" href="assets/css/components.css">
     <style>
-        .auth-container {
+        body {
+            background-color: #f4f6f8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 15px;
+            margin: 0;
+            font-family: inherit;
+        }
+        .auth-box {
+            width: 100%;
             max-width: 400px;
-            margin: 60px auto;
-            padding: 30px;
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 28px 24px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+        .brand-header {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+        .brand-header h1 {
+            font-size: 22px;
+            color: #2563eb;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .brand-header p {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+        }
+        .alert-error {
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 18px;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         .form-group label {
             display: block;
-            margin-bottom: 6px;
+            font-size: 13px;
             font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
         }
-        .password-wrapper {
+        .input-wrapper {
             position: relative;
             display: flex;
             align-items: center;
         }
-        .form-group input {
+        .form-control {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 14px;
+            background: #ffffff;
             box-sizing: border-box;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
-        .password-wrapper input {
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .input-wrapper input {
             padding-right: 40px;
         }
         .toggle-password {
@@ -85,53 +128,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 16px;
-            color: #666;
+            font-size: 15px;
+            color: #64748b;
             padding: 4px;
+            line-height: 1;
         }
         .btn-submit {
             width: 100%;
-            padding: 10px;
-            background: #ffc107;
-            color: #000;
+            padding: 10px 0;
+            background: #2563eb;
+            color: #ffffff;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            margin-top: 6px;
         }
         .btn-submit:hover {
-            background: #e0a800;
+            background: #1d4ed8;
+        }
+        .auth-footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+        }
+        .auth-footer a {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .auth-footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <h2 style="text-align: center; margin-bottom: 20px;">รีเซ็ตรหัสผ่าน</h2>
-        
+    <div class="auth-box">
+        <div class="brand-header">
+            <h1>รีเซ็ตรหัสผ่าน</h1>
+            <p>กรอกข้อมูลบัญชีเพื่อตั้งรหัสผ่านใหม่</p>
+        </div>
+
         <?php if (!empty($error)): ?>
-            <div style="padding: 10px; background: #ffebee; color: #c62828; border-radius: 5px; margin-bottom: 15px; font-size: 14px;">
-                <?php echo htmlspecialchars($error); ?>
+            <div class="alert-error">
+                <?= htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
 
         <form action="forgot_password.php" method="POST">
             <div class="form-group">
-                <label for="username">ชื่อผู้ใช้ หรือ อีเมล</label>
-                <input type="text" id="username" name="username" placeholder="กรอกชื่อผู้ใช้หรืออีเมลของคุณ" required>
+                <label for="username">ชื่อผู้ใช้ หรือ อีเมล *</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="กรอกชื่อผู้ใช้หรืออีเมลของคุณ" required>
             </div>
+
             <div class="form-group">
-                <label for="password">รหัสผ่านใหม่ (New Password)</label>
-                <div class="password-wrapper">
-                    <input type="password" id="password" name="password" placeholder="รหัสผ่านใหม่" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword('password', this)">👁️</button>
+                <label for="password">รหัสผ่านใหม่ (New Password) *</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" class="form-control" placeholder="รหัสผ่านใหม่" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword('password', this)" title="แสดง/ซ่อนรหัสผ่าน">👁️</button>
                 </div>
             </div>
+
             <button type="submit" class="btn-submit">เปลี่ยนรหัสผ่าน</button>
         </form>
-        <p style="text-align: center; margin-top: 15px; font-size: 14px;">
+
+        <div class="auth-footer">
             จำรหัสผ่านได้แล้ว? <a href="login.php">กลับไปเข้าสู่ระบบ</a>
-        </p>
+        </div>
     </div>
 
     <script>

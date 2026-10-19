@@ -144,8 +144,8 @@ $moodMap = [
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
     .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px; }
     .form-group input, .form-group select { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-    .btn-submit { padding: 9px 20px; background: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .btn-submit:hover { background: #218838; }
+    .btn-submit { padding: 9px 20px; background: #2563eb; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.2s ease; }
+    .btn-submit:hover { background: #1d4ed8; }
     table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     table.data-table th, table.data-table td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; font-size: 13px; }
     table.data-table th { background: #f8f9fa; }
@@ -160,6 +160,7 @@ $moodMap = [
       color: #555;
       font-size: 12px;
       font-weight: 600;
+      transition: all 0.15s ease;
     }
     .metric-tab.active-water    { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
     .metric-tab.active-sleep    { background: #6366f1; color: #fff; border-color: #6366f1; }

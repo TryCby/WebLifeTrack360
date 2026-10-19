@@ -1,8 +1,8 @@
 <?php
-$host = getenv('DB_HOST') ?: 'localhost';
-$db   = getenv('DB_NAME') ?: 'lifetrack_db';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') ?: '';
+$host = 'localhost';
+$db   = 'lifetrack_db';
+$user = 'root';
+$pass = ''; // บน XAMPP หรือ Laragon ค่าเริ่มต้นมักเป็นค่าว่าง
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -15,6 +15,6 @@ $options = [
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-    throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    die("ไม่สามารถเชื่อมต่อฐานข้อมูลได้: " . $e->getMessage());
 }
 ?>

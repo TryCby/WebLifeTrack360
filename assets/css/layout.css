@@ -81,8 +81,8 @@ main section:first-child p {
   font-size: 0.95rem;
 }
 
-/* การ์ด 4 โมดูล: บนมือถือเรียง 1 คอลัมน์เดี่ยว */
-main section:last-child {
+/* การ์ด Dashboard Grid: ค่าเริ่มต้นบนมือถือ 1 คอลัมน์ */
+.dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
@@ -122,7 +122,7 @@ footer {
 
 /* แท็บเล็ต (640px ขึ้นไป): การ์ดแสดง 2 คอลัมน์ */
 @media (min-width: 640px) {
-  main section:last-child {
+  .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -162,8 +162,30 @@ footer {
     padding: 2.5rem 2rem;
   }
 
-  main section:last-child {
+  .dashboard-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 1.5rem;
   }
+}
+
+/* ==========================================================================
+   3. RESPONSIVE UTILITIES & TABLE CONTAINER
+   ========================================================================== */
+
+/* ป้องกันตารางล้นจอ โดยยอมให้เลื่อนแนวนอนเฉพาะตัวตาราง */
+.table-card, 
+.list-card {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* รักษาระยะไม่ให้ข้อความในตารางบีบจนแตกแถวผิดรูป */
+table.data-table th,
+table.data-table td {
+  white-space: nowrap;
+}
+
+/* ข้อยกเว้น: ชื่องานหรือรายละเอียด ให้ตัดคำขึ้นบรรทัดใหม่ได้ตามปกติ */
+table.data-table td:nth-child(2) {
+  white-space: normal;
 }
