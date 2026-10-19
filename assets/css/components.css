@@ -15,6 +15,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
+  touch-action: manipulation;
 }
 
 .btn-primary {
@@ -49,6 +50,7 @@
   border: none;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  touch-action: manipulation;
 }
 
 .btn-delete:hover {
@@ -96,7 +98,7 @@
   transition: width 0.4s ease;
 }
 
-/* 4. Form Controls (ช่องกรอกข้อมูลพื้นฐาน) */
+/* 4. Form Controls (ช่องกรอกข้อมูลพื้นฐาน ป้องกันคีย์บอร์ดหลุดและปิด Auto Zoom บนมือถือ) */
 .form-group {
   margin-bottom: 1rem;
   display: flex;
@@ -106,12 +108,16 @@
 
 .form-control {
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 16px; /* บังคับ 16px ป้องกันมือถือ iOS/Android เด้ง Auto Zoom */
   border: 1px solid var(--border-color);
   border-radius: 6px;
   outline: none;
   background-color: #ffffff;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation; /* ลดความหน่วงเวลาสัมผัสจอ */
+  box-sizing: border-box;
 }
 
 .form-control:focus {
